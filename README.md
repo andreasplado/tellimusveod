@@ -1,4 +1,4 @@
-# Place Tracker
+# Tellimusveod
 
 A sample place tracking app that uses the
 [google_maps_flutter](https://github.com/flutter/plugins/tree/master/packages/google_maps_flutter)
