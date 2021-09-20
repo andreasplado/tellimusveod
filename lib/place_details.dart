@@ -36,7 +36,7 @@ class PlaceDetailsState extends State<PlaceDetails> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_place.name),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.blue,
         actions: [
           Padding(
             padding: const EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),

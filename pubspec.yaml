@@ -22,6 +22,7 @@ dependencies:
 
   form_bloc: 0.20.6
   flutter_form_bloc: 0.20.6
+  easy_localization: ^3.0.0
 
 dev_dependencies:
   flutter_test:
