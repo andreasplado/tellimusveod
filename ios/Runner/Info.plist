@@ -41,5 +41,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open.</string>
+
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>See rakendus vajab taustal juurdepääsu asukohale.</string>
+
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>See rakendus vajab avamisel ja taustal juurdepääsu asukohale.</string>
 </dict>
 </plist>

@@ -7,7 +7,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,10 +22,8 @@ class MapConfiguration {
 
   final PlaceCategory selectedCategory;
 
-  const MapConfiguration({
-    required this.places,
-    required this.selectedCategory,
-  });
+  const MapConfiguration(
+      {required this.places, required this.selectedCategory});
 
   @override
   int get hashCode => places.hashCode ^ selectedCategory.hashCode;
@@ -54,20 +54,23 @@ class MapConfiguration {
 class PlaceMap extends StatefulWidget {
   final LatLng? center;
 
-  const PlaceMap({
-    Key? key,
-    this.center,
-  }) : super(key: key);
+  const PlaceMap(
+      {Key? key, this.center, GoogleMapController? googleMapController})
+      : super(key: key);
 
   @override
   PlaceMapState createState() => PlaceMapState();
 }
 
 class PlaceMapState extends State<PlaceMap> {
+  Geolocator geolocator = Geolocator();
+
   Completer<GoogleMapController> mapController = Completer();
 
   MapType _currentMapType = MapType.normal;
 
+  static LatLng _initialPosition = new LatLng(59.436962, 24.753574);
+  static LatLng _currentPosition = _initialPosition;
   LatLng? _lastMapPosition;
 
   final Map<Marker, Place> _markedPlaces = <Marker, Place>{};
@@ -78,9 +81,38 @@ class PlaceMapState extends State<PlaceMap> {
 
   MapConfiguration? _configuration;
 
+  GoogleMapController? _googleMapController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  void _getUserLocation(GoogleMapController googleMapController) async {
+    Position position =
+        await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
+    if (_currentPosition != position) {
+      _initialPosition = LatLng(position.latitude, position.longitude);
+      googleMapController
+          .animateCamera(CameraUpdate.newLatLngZoom(_initialPosition, 14));
+
+      //track location change
+      Location location = new Location();
+      location.onLocationChanged.listen((currentLocation) async {
+        Position position = await Geolocator.getCurrentPosition(
+            forceAndroidLocationManager: true);
+        _initialPosition = LatLng(position.latitude, position.longitude);
+        googleMapController
+            .animateCamera(CameraUpdate.newLatLngZoom(_initialPosition, 18));
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _maybeUpdateMapConfiguration();
+
     var state = Provider.of<AppState>(context);
 
     return Builder(builder: (context) {
@@ -94,22 +126,27 @@ class PlaceMapState extends State<PlaceMap> {
             GoogleMap(
               onMapCreated: onMapCreated,
               initialCameraPosition: CameraPosition(
-                target: widget.center!,
+                target: _currentPosition, //widget.center!,
                 zoom: 11.0,
               ),
               mapType: _currentMapType,
               markers: _markers,
               onCameraMove: (position) => _lastMapPosition = position.target,
             ),
-            _CategoryButtonBar(
-              selectedPlaceCategory: state.selectedCategory,
-              visible: _pendingMarker == null,
-              onChanged: _switchSelectedCategory,
-            ),
-            _AddPlaceButtonBar(
-              visible: _pendingMarker != null,
-              onSavePressed: () => _confirmAddPlace(context),
-              onCancelPressed: _cancelAddPlace,
+            Container(
+              child: Align(
+                alignment: Alignment.center,
+                child: IconButton(
+                  icon: Icon(
+                    state.viewType == PlaceTrackerViewType.map
+                        ? Icons.my_location
+                        : Icons.my_location,
+                    size: 32.0,
+                    color: Colors.blue[400],
+                  ),
+                  onPressed: () {},
+                ),
+              ),
             ),
             _MapFabs(
               visible: _pendingMarker == null,
@@ -123,8 +160,11 @@ class PlaceMapState extends State<PlaceMap> {
   }
 
   Future<void> onMapCreated(GoogleMapController controller) async {
-    mapController.complete(controller);
-    _lastMapPosition = widget.center;
+    setState(() {
+      _googleMapController = controller;
+    });
+
+    _getUserLocation(controller);
 
     // Draw initial place markers on creation so that we have something
     // interesting to look at.
@@ -138,6 +178,10 @@ class PlaceMapState extends State<PlaceMap> {
 
     // Zoom to fit the initially selected category.
     _zoomToFitSelectedCategory();
+  }
+
+  void _onCameraMove(CameraPosition position) {
+    _lastMapPosition = position.target;
   }
 
   @override
@@ -186,7 +230,7 @@ class PlaceMapState extends State<PlaceMap> {
         final updatedMarker = _pendingMarker!.copyWith(
           iconParam: placeMarker,
           infoWindowParam: InfoWindow(
-            title: 'New Place',
+            title: 'Uus koht',
             snippet: null,
             onTap: () => _pushPlaceDetailsScreen(newPlace),
           ),
@@ -378,8 +422,7 @@ class PlaceMapState extends State<PlaceMap> {
       final updatedMarker = marker.copyWith(
         infoWindowParam: InfoWindow(
           title: place.name,
-          snippet:
-              place.starRating != 0 ? '${place.starRating} Star Rating' : null,
+          snippet: place.starRating != 0 ? '${place.starRating} Hinnang' : null,
         ),
       );
       _updateMarker(marker: marker, updatedMarker: updatedMarker, place: place);
@@ -445,6 +488,37 @@ class PlaceMapState extends State<PlaceMap> {
   static List<Place> _getPlacesForCategory(
       PlaceCategory category, List<Place> places) {
     return places.where((place) => place.category == category).toList();
+  }
+
+  Future<Position> _getGeoLocationPosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      await Geolocator.openLocationSettings();
+      return Future.error('Location services are disabled.');
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    final Position position =
+        await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
+    return position;
   }
 }
 

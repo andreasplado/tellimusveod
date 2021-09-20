@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:place_tracker/sidemenu.dart';
 import 'package:provider/provider.dart';
 
 import 'place.dart';
@@ -18,6 +19,7 @@ enum PlaceTrackerViewType {
 
 class PlaceTrackerApp extends StatelessWidget {
   const PlaceTrackerApp({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +42,11 @@ class _PlaceTrackerHomePage extends StatelessWidget {
           children: const [
             Padding(
               padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
-              child: Icon(Icons.pin_drop, size: 24.0),
+              child: const Text(
+                'TELLIMUSVEOD',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
             ),
-            Text('Tellimusveod'),
           ],
         ),
         backgroundColor: Colors.blue[400],
@@ -52,7 +56,7 @@ class _PlaceTrackerHomePage extends StatelessWidget {
             child: IconButton(
               icon: Icon(
                 state.viewType == PlaceTrackerViewType.map
-                    ? Icons.list
+                    ? Icons.local_shipping
                     : Icons.map,
                 size: 32.0,
               ),
@@ -67,6 +71,7 @@ class _PlaceTrackerHomePage extends StatelessWidget {
           ),
         ],
       ),
+      drawer: SideMenu(),
       body: IndexedStack(
         index: state.viewType == PlaceTrackerViewType.map ? 0 : 1,
         children: const [

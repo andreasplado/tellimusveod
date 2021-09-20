@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:place_tracker/contact.dart';
+import 'package:place_tracker/sidemenu.dart';
 import 'package:provider/provider.dart';
 
 import 'place_tracker_app.dart';
