@@ -10,7 +10,7 @@ class Settings extends StatelessWidget {
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
-            Text('Seaded'),
+            Text('Kontakt'),
           ],
         ),
 
@@ -28,6 +28,8 @@ class Settings extends StatelessWidget {
               },
             ),
           ),
+
+
         ],
       ),
     );
