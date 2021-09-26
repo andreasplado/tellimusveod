@@ -26,6 +26,34 @@ class ContactState extends State<Contact> {
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
     return Scaffold(
+        appBar: AppBar(
+          title: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: const [
+              Text('Kontakt'),
+            ],
+          ),
+
+
+          backgroundColor: Colors.blue[400],
+          actions: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 0.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.save,
+                  size: 32.0,
+                ),
+                onPressed: () {
+                },
+              ),
+            ),
+
+
+          ],
+
+
+        ),
         body: Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, 0),child: Column(
       children: <Widget>[
         FormBuilder(
