@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:settings_ui/settings_ui.dart';
 
 // Define a custom Form widget.
 class Contact extends StatefulWidget {
@@ -26,101 +26,48 @@ class ContactState extends State<Contact> {
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: const [
-              Text('Kontakt'),
-            ],
-          ),
-
-
-          backgroundColor: Colors.blue[400],
-          actions: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 0.0),
-              child: IconButton(
-                icon: Icon(
-                  Icons.save,
-                  size: 32.0,
-                ),
-                onPressed: () {
-                },
-              ),
-            ),
-
-
+      appBar: AppBar(
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            Text('Kontakt'),
           ],
-
-
         ),
-        body: Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, 0),child: Column(
-      children: <Widget>[
-        FormBuilder(
-          key: _fbKey,
-          child: Column(
-            children: <Widget>[
-              FormBuilderDateTimePicker(
-                inputType: InputType.date,
-                format: DateFormat("yyyy-MM-dd"),
-                decoration: InputDecoration(labelText: "Appointment Time"),
-                name: 'k',
+        backgroundColor: Colors.blue[400],
+        actions: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 0.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.save,
+                size: 32.0,
               ),
-              FormBuilderSlider(
-                min: 0.0,
-                max: 10.0,
-                initialValue: 1.0,
-                divisions: 20,
-                decoration: InputDecoration(labelText: "Number of somethings"),
-                name: 'h',
+              onPressed: () {},
+            ),
+          ),
+        ],
+      ),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            titlePadding: EdgeInsets.all(20),
+            title: 'Andemd',
+            tiles: [
+              SettingsTile(
+                title: 'Telefon',
+                subtitle: '+37258802867',
+                leading: Icon(Icons.phone),
+                onPressed: (BuildContext context) {},
               ),
-              FormBuilderCheckbox(
-                initialValue: false,
-                name: 'kjkk',
-                title: Text("rf"),
-              ),
-              FormBuilderDropdown(
-                decoration: InputDecoration(labelText: "Gender"),
-                // initialValue: 'Male',
-                hint: Text('Select Gender'),
-                items: ['Male', 'Female', 'Other']
-                    .map((gender) =>
-                        DropdownMenuItem(value: gender, child: Text("$gender")))
-                    .toList(),
-                name: 'cddvvd',
-              ),
-              FormBuilderTextField(
-                decoration: InputDecoration(labelText: "Age"),
-                name: 'dddd',
-              ),
-              FormBuilderSegmentedControl(
-                decoration: InputDecoration(labelText: "Movie Rating (Archer)"),
-                options: List.generate(5, (i) => i + 1)
-                    .map((number) => FormBuilderFieldOption(value: number))
-                    .toList(),
-                name: 'jhju',
-              ),
-              FormBuilderSwitch(
-                initialValue: true,
-                name: 'hjhjhhj',
-                title: Text("fff"),
+              SettingsTile(
+                title: 'Email',
+                subtitle: 'andreasplado@gmail.com',
+                leading: Icon(Icons.email),
               ),
             ],
           ),
-        ),
-        Row(
-          children: <Widget>[
-            MaterialButton(
-              onPressed: () {},
-              child: Text("Submit"),
-            ),
-            MaterialButton(
-              child: Text("Reset"),
-              onPressed: () {},
-            ),
-          ],
-        )
-      ],
-    )));
+        ],
+      ),
+    );
   }
 }

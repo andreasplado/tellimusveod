@@ -96,17 +96,24 @@ class PlaceMapState extends State<PlaceMap> {
       _initialPosition = LatLng(position.latitude, position.longitude);
       googleMapController
           .animateCamera(CameraUpdate.newLatLngZoom(_initialPosition, 14));
+      setState(() {
+        _currentPosition = LatLng(position.latitude, position.longitude);
+      });
 
       //track location change
-      Location location = new Location();
-      location.onLocationChanged.listen((currentLocation) async {
-        Position position = await Geolocator.getCurrentPosition(
-            forceAndroidLocationManager: true);
-        _initialPosition = LatLng(position.latitude, position.longitude);
-        googleMapController
-            .animateCamera(CameraUpdate.newLatLngZoom(_initialPosition, 18));
-      });
+
     }
+  }
+
+  void _trackLocationChange(GoogleMapController googleMapController){
+    Location location = new Location();
+    location.onLocationChanged.listen((currentLocation) async {
+      Position position = await Geolocator.getCurrentPosition(
+          forceAndroidLocationManager: true);
+      _initialPosition = LatLng(position.latitude, position.longitude);
+      googleMapController
+          .animateCamera(CameraUpdate.newLatLngZoom(_initialPosition, 18));
+    });
   }
 
   @override
@@ -120,18 +127,63 @@ class PlaceMapState extends State<PlaceMap> {
       // _AddPlaceButtonBar's onSavePressed callback. This callback shows a
       // SnackBar and to do this, we need a build context that has Scaffold as
       // an ancestor.
+      final googleMap = new GoogleMap(
+        onMapCreated: onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: _currentPosition, //widget.center!,
+          zoom: 11.0,
+        ),
+        mapType: _currentMapType,
+        markers: _markers,
+        onCameraMove: (position) => _lastMapPosition = position.target,
+      );
+
+      final Future<String> _calculation = Future<String>.delayed(
+        const Duration(seconds: 2),
+        () => 'Andmed laeti',
+      );
+
       return Center(
         child: Stack(
           children: [
-            GoogleMap(
-              onMapCreated: onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: _currentPosition, //widget.center!,
-                zoom: 11.0,
-              ),
-              mapType: _currentMapType,
-              markers: _markers,
-              onCameraMove: (position) => _lastMapPosition = position.target,
+            FutureBuilder<String>(
+              future: _calculation,
+              // a previously-obtained Future<String> or null
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                List<Widget> children;
+                if (snapshot.hasData) {
+                  children = <Widget>[
+                    googleMap,
+                    Center(
+                      child: Text('Result: ${snapshot.data}'),
+                    )
+                  ];
+                } else if (snapshot.hasError) {
+                  children = <Widget>[
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 60,
+                    ),
+                    Center(
+                      child: Text('Viga: ${snapshot.error}'),
+                    )
+                  ];
+                } else {
+                  children = const <Widget>[
+                    SizedBox(
+                      child: CircularProgressIndicator(),
+                      width: 60,
+                      height: 60,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 0),
+                      child: Text('Palun oodake...'),
+                    )
+                  ];
+                }
+                return Center(child: children[0]);
+              },
             ),
             Container(
               child: Align(
@@ -148,11 +200,6 @@ class PlaceMapState extends State<PlaceMap> {
                 ),
               ),
             ),
-            _MapFabs(
-              visible: _pendingMarker == null,
-              onAddPlacePressed: _onAddPlacePressed,
-              onToggleMapTypePressed: _onToggleMapTypePressed,
-            ),
           ],
         ),
       );
@@ -160,11 +207,10 @@ class PlaceMapState extends State<PlaceMap> {
   }
 
   Future<void> onMapCreated(GoogleMapController controller) async {
-    setState(() {
-      _googleMapController = controller;
-    });
+    _googleMapController = controller;
 
     _getUserLocation(controller);
+    _trackLocationChange(controller);
 
     // Draw initial place markers on creation so that we have something
     // interesting to look at.
@@ -500,19 +546,18 @@ class PlaceMapState extends State<PlaceMap> {
       // accessing the position and request users of the
       // App to enable the location services.
       await Geolocator.openLocationSettings();
-      return Future.error('Location services are disabled.');
+      return Future.error('Asukoha teenused on kinni!');
     }
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+        return Future.error('Asukoha luba puudub!');
       }
     }
     if (permission == LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error('Asukoha luba puudub!.');
     }
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
@@ -620,16 +665,20 @@ class _CategoryButtonBar extends StatelessWidget {
   }
 }
 
-class _MapFabs extends StatelessWidget {
+class _MapFabs extends StatefulWidget {
   final bool visible;
   final VoidCallback onAddPlacePressed;
   final VoidCallback onToggleMapTypePressed;
+  final GoogleMapController googleMapController;
 
-  const _MapFabs({
+  LatLng? loaction;
+
+  _MapFabs({
     Key? key,
     required this.visible,
     required this.onAddPlacePressed,
     required this.onToggleMapTypePressed,
+    required this.googleMapController,
   }) : super(key: key);
 
   @override
@@ -657,9 +706,23 @@ class _MapFabs extends StatelessWidget {
               backgroundColor: Colors.lightBlue,
               child: const Icon(Icons.layers, size: 28.0),
             ),
+            FloatingActionButton(
+              heroTag: 'toggle_map_type_button',
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              mini: true,
+              backgroundColor: Colors.lightBlue,
+              onPressed: () async {
+                await googleMapController.moveCamera(
+                    CameraUpdate.newLatLngZoom(const LatLng(50, -71), 12));
+              },
+              child: const Icon(Icons.my_location, size: 28.0),
+            ),
           ],
         ),
       ),
     );
   }
+
+  @override
+  PlaceMapState createState() => PlaceMapState();
 }

@@ -85,19 +85,14 @@ class _SideMenuState extends State<SideMenu> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
-            child: Text(
-              'Tellimusveod',
-              style: TextStyle(color: Colors.black, fontSize: 25),
-
-            ),
+          const DrawerHeader(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(10.0),
                     bottomRight: Radius.circular(10.0)),
                 color: Colors.white,
                 image: DecorationImage(
-                    fit: BoxFit.fill, image: AssetImage('icon/icon.png'))),
+                    fit: BoxFit.cover, image: AssetImage('icon.png'))), child: null,
           ),
           ListTile(
             title: const Text('Seaded'),
