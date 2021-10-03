@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'errorpage/failed_settings.dart';
 import 'errorpage/not_retrieved_settings.dart';
+import 'errorpage/settings-not-defined.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -51,78 +52,34 @@ class _SettingsState extends State<Settings> {
                   Icons.save,
                   size: 32.0,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  SettingsData settingsData = SettingsData(language: "language", useDarkTheme: true, useBiometricAuthentication: true);
+                  saveSwitchState(settingsData);
+                },
               ),
             ),
           ],
         ),
-        body: FutureBuilder<bool>(
+        body: FutureBuilder<SettingsData>(
           future: getSwitchState(),
-          builder:(BuildContext context, AsyncSnapshot<bool> snapshot) {
-            List<Widget> children;
-            if (snapshot.hasData) {
-              NotRetrievedSettings();
-            } else if (snapshot.hasError) {
-              FailedSettings();
+          builder:(context, AsyncSnapshot<SettingsData> settingsData) {
+            if (settingsData.hasData) {
+              return DefaultSettings();
+            } else if (settingsData.hasError) {
+              return FailedSettings();
             } else {
-              return SettingsList(
-                sections: [
-                  SettingsSection(
-                    titlePadding: EdgeInsets.all(20),
-                    title: 'Põhiseaded',
-                    tiles: [
-                      SettingsTile(
-                        title: 'Keel',
-                        subtitle: 'Inglise',
-                        leading: Icon(Icons.language),
-                        onPressed: (BuildContext context) {},
-                      ),
-                      SettingsTile.switchTile(
-                          title: 'Kasuta tumedat teemat',
-                          enabled: false,
-                          leading: Icon(Icons.phone_android),
-                          onToggle: (bool value) {
-                            setState(() {
-                              saveSwitchState(value);
-                            });
-                          },
-                          switchValue: true)
-                    ],
-                  ),
-                  SettingsSection(
-                    titlePadding: EdgeInsets.all(20),
-                    title: 'Turvaseaded',
-                    tiles: [
-                      SettingsTile(
-                        title: 'Muuda parooli',
-                        subtitle: 'Sea uus parool',
-                        leading: Icon(Icons.password),
-                        onPressed: (BuildContext context) {},
-                      ),
-                      SettingsTile.switchTile(
-                        title: 'Kasuta biomeetrilist autentimist',
-                        leading: Icon(Icons.fingerprint),
-                        switchValue: true,
-                        onToggle: (value) {},
-                      ),
-                      SettingsTile(
-                        title: 'Kasutaja kustutamine',
-                        subtitle: 'Kustuta kasutaja',
-                        leading: Icon(Icons.delete_forever),
-                        onPressed: (BuildContext context) {},
-                      ),
-                    ],
-                  ),
-                ],
-              );
+              return SettingsNotDefined();
             }
+            return SettingsNotDefined();
           },
         ));
   }
 
-  Future<void> saveSwitchState(bool value) async {
+  Future<void> saveSwitchState (SettingsData settingsData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool("darkTheme", value);
+    prefs.setBool("darkTheme", settingsData.isdarktheme);
+    prefs.setString("language", settingsData.language);
+    prefs.setBool("isBiomethricAuthentication", settingsData.useBiometricAuthentication);
   }
 
   Future<SettingsData> getSwitchState() async {

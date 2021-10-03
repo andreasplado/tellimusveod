@@ -6,6 +6,8 @@ class SettingsData {
   SettingsData(
       {required this.language, required this.useDarkTheme, required this.useBiometricAuthentication});
 
+  bool get isdarktheme => this.useDarkTheme;
+
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();

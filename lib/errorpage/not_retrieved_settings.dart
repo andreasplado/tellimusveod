@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-class NotRetrievedSettings extends StatelessWidget {
-  const NotRetrievedSettings({Key? key}) : super(key: key);
+class DefaultSettings extends StatelessWidget {
+  const DefaultSettings({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
