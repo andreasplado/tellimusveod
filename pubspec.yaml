@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  assets:
+    - icon/
 
   cupertino_icons: ^1.0.0
   google_maps_flutter: ^2.0.6
