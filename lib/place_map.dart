@@ -136,6 +136,7 @@ class PlaceMapState extends State<PlaceMap> {
         mapType: _currentMapType,
         markers: _markers,
         onCameraMove: (position) => _lastMapPosition = position.target,
+          myLocationEnabled: true
       );
 
       final Future<String> _calculation = Future<String>.delayed(
