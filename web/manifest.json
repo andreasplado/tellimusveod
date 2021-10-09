@@ -1,23 +1,25 @@
 {
-    "name": "place_tracker",
+    "name": "Tellimusveod",
     "short_name": "place_tracker",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Order and deliver platform.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
         {
-            "src": "icons/Icon-192.png",
+            "src": "icon/icon.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "icons/Icon-512.png",
+            "src": "icon/icon.png",
             "sizes": "512x512",
             "type": "image/png"
         }
-    ]
+    ],
+    "version": "1.0",
+    "author": "Andreas Plado"
 }
