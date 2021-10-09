@@ -26,7 +26,7 @@ class SettingsNotDefined extends StatelessWidget {
                 title: 'Kasuta tumedat teemat',
                 leading: Icon(Icons.phone_android),
                 onToggle: (value) {
-                    Settings settingstate = Settings();
+                    Settings settingstate = const Settings();
                 }, switchValue: false,
               ),
             ],

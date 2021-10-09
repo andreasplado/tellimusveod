@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'errorpage/failed_settings.dart';
 import 'errorpage/not_retrieved_settings.dart';
-import 'errorpage/settings-not-defined.dart';
+import 'errorpage/settings_not_defined.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -48,7 +48,7 @@ class _SettingsState extends State<Settings> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0.0, 0.0, 16.0, 0.0),
               child: IconButton(
-                icon: Icon(
+                icon: const Icon(
                   Icons.save,
                   size: 32.0,
                 ),
@@ -64,11 +64,11 @@ class _SettingsState extends State<Settings> {
           future: getSwitchState(),
           builder:(context, AsyncSnapshot<SettingsData> settingsData) {
             if (settingsData.hasData) {
-              return DefaultSettings();
+              return const DefaultSettings();
             } else if (settingsData.hasError) {
-              return FailedSettings();
+              return const FailedSettings();
             } else {
-              return SettingsNotDefined();
+              return const SettingsNotDefined();
             }
             return SettingsNotDefined();
           },

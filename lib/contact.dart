@@ -51,7 +51,7 @@ class ContactState extends State<Contact> {
         sections: [
           SettingsSection(
             titlePadding: EdgeInsets.all(20),
-            title: 'Andemd',
+            title: 'Andmed',
             tiles: [
               SettingsTile(
                 title: 'Telefon',

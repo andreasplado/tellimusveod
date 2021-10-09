@@ -81,7 +81,6 @@ class PlaceMapState extends State<PlaceMap> {
 
   MapConfiguration? _configuration;
 
-  GoogleMapController? _googleMapController;
 
   @override
   void initState() {
@@ -91,8 +90,18 @@ class PlaceMapState extends State<PlaceMap> {
 
   void _getUserLocation(GoogleMapController googleMapController) async {
     Position position =
-        await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
-    if (_currentPosition != position) {
+    await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
+    Position currentPositionConverted = Position(
+        longitude: _currentPosition.longitude,
+        latitude: _currentPosition.latitude,
+        timestamp: DateTime
+            .now(),
+        accuracy: 0.0,
+        altitude: 0.0,
+        heading: 0.0,
+        speed: 0.0,
+        speedAccuracy: 0.0);
+    if (currentPositionConverted != position) {
       _initialPosition = LatLng(position.latitude, position.longitude);
       googleMapController
           .animateCamera(CameraUpdate.newLatLngZoom(_initialPosition, 14));
@@ -105,7 +114,7 @@ class PlaceMapState extends State<PlaceMap> {
     }
   }
 
-  void _trackLocationChange(GoogleMapController googleMapController){
+  void _trackLocationChange(GoogleMapController googleMapController) {
     Location location = new Location();
     location.onLocationChanged.listen((currentLocation) async {
       Position position = await Geolocator.getCurrentPosition(
@@ -128,20 +137,20 @@ class PlaceMapState extends State<PlaceMap> {
       // SnackBar and to do this, we need a build context that has Scaffold as
       // an ancestor.
       final googleMap = new GoogleMap(
-        onMapCreated: onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _currentPosition, //widget.center!,
-          zoom: 11.0,
-        ),
-        mapType: _currentMapType,
-        markers: _markers,
-        onCameraMove: (position) => _lastMapPosition = position.target,
+          onMapCreated: onMapCreated,
+          initialCameraPosition: CameraPosition(
+            target: _currentPosition, //widget.center!,
+            zoom: 11.0,
+          ),
+          mapType: _currentMapType,
+          markers: _markers,
+          onCameraMove: (position) => _lastMapPosition = position.target,
           myLocationEnabled: true
       );
 
       final Future<String> _calculation = Future<String>.delayed(
         const Duration(seconds: 2),
-        () => 'Andmed laeti',
+            () => 'Andmed laeti',
       );
 
       return Center(
@@ -208,15 +217,15 @@ class PlaceMapState extends State<PlaceMap> {
   }
 
   Future<void> onMapCreated(GoogleMapController controller) async {
-    _googleMapController = controller;
-
     _getUserLocation(controller);
     _trackLocationChange(controller);
 
     // Draw initial place markers on creation so that we have something
     // interesting to look at.
     var markers = <Marker>{};
-    for (var place in Provider.of<AppState>(context, listen: false).places) {
+    for (var place in Provider
+        .of<AppState>(context, listen: false)
+        .places) {
       markers.add(await _createPlaceMarker(context, place));
     }
     setState(() {
@@ -244,7 +253,9 @@ class PlaceMapState extends State<PlaceMap> {
   void _zoomToFitSelectedCategory() {
     _zoomToFitPlaces(
       _getPlacesForCategory(
-        Provider.of<AppState>(context, listen: false).selectedCategory,
+        Provider
+            .of<AppState>(context, listen: false)
+            .selectedCategory,
         _markedPlaces.values.toList(),
       ),
     );
@@ -267,11 +278,15 @@ class PlaceMapState extends State<PlaceMap> {
         latLng: _pendingMarker!.position,
         name: _pendingMarker!.infoWindow.title!,
         category:
-            Provider.of<AppState>(context, listen: false).selectedCategory,
+        Provider
+            .of<AppState>(context, listen: false)
+            .selectedCategory,
       );
 
       var placeMarker = await _getPlaceMarkerIcon(context,
-          Provider.of<AppState>(context, listen: false).selectedCategory);
+          Provider
+              .of<AppState>(context, listen: false)
+              .selectedCategory);
 
       setState(() {
         final updatedMarker = _pendingMarker!.copyWith(
@@ -298,7 +313,7 @@ class PlaceMapState extends State<PlaceMap> {
         SnackBar(
           duration: const Duration(seconds: 3),
           content:
-              const Text('Uus koht lisatud.', style: TextStyle(fontSize: 16.0)),
+          const Text('Uus koht lisatud.', style: TextStyle(fontSize: 16.0)),
           action: SnackBarAction(
             label: 'Muuda',
             onPressed: () async {
@@ -310,8 +325,10 @@ class PlaceMapState extends State<PlaceMap> {
 
       // Add the new place to the places stored in appState.
       final newPlaces =
-          List<Place>.from(Provider.of<AppState>(context, listen: false).places)
-            ..add(newPlace);
+      List<Place>.from(Provider
+          .of<AppState>(context, listen: false)
+          .places)
+        ..add(newPlace);
 
       // Manually update our map configuration here since our map is already
       // updated with the new marker. Otherwise, the map would be reconfigured
@@ -319,7 +336,9 @@ class PlaceMapState extends State<PlaceMap> {
       _configuration = MapConfiguration(
         places: newPlaces,
         selectedCategory:
-            Provider.of<AppState>(context, listen: false).selectedCategory,
+        Provider
+            .of<AppState>(context, listen: false)
+            .selectedCategory,
       );
 
       Provider.of<AppState>(context, listen: false).setPlaces(newPlaces);
@@ -337,7 +356,9 @@ class PlaceMapState extends State<PlaceMap> {
       ),
       icon: await _getPlaceMarkerIcon(context, place.category),
       visible: place.category ==
-          Provider.of<AppState>(context, listen: false).selectedCategory,
+          Provider
+              .of<AppState>(context, listen: false)
+              .selectedCategory,
     );
     _markedPlaces[marker] = place;
     return marker;
@@ -347,7 +368,7 @@ class PlaceMapState extends State<PlaceMap> {
     _configuration ??=
         MapConfiguration.of(Provider.of<AppState>(context, listen: false));
     final newConfiguration =
-        MapConfiguration.of(Provider.of<AppState>(context, listen: false));
+    MapConfiguration.of(Provider.of<AppState>(context, listen: false));
 
     // Since we manually update [_configuration] when place or selectedCategory
     // changes come from the [place_map], we should only enter this if statement
@@ -395,7 +416,9 @@ class PlaceMapState extends State<PlaceMap> {
   void _onPlaceChanged(Place value) {
     // Replace the place with the modified version.
     final newPlaces =
-        List<Place>.from(Provider.of<AppState>(context, listen: false).places);
+    List<Place>.from(Provider
+        .of<AppState>(context, listen: false)
+        .places);
     final index = newPlaces.indexWhere((place) => place.id == value.id);
     newPlaces[index] = value;
 
@@ -407,7 +430,9 @@ class PlaceMapState extends State<PlaceMap> {
     _configuration = MapConfiguration(
       places: newPlaces,
       selectedCategory:
-          Provider.of<AppState>(context, listen: false).selectedCategory,
+      Provider
+          .of<AppState>(context, listen: false)
+          .selectedCategory,
     );
 
     Provider.of<AppState>(context, listen: false).setPlaces(newPlaces);
@@ -415,7 +440,7 @@ class PlaceMapState extends State<PlaceMap> {
 
   void _onToggleMapTypePressed() {
     final nextType =
-        MapType.values[(_currentMapType.index + 1) % MapType.values.length];
+    MapType.values[(_currentMapType.index + 1) % MapType.values.length];
 
     setState(() {
       _currentMapType = nextType;
@@ -515,8 +540,8 @@ class PlaceMapState extends State<PlaceMap> {
     );
   }
 
-  static Future<BitmapDescriptor> _getPlaceMarkerIcon(
-      BuildContext context, PlaceCategory category) async {
+  static Future<BitmapDescriptor> _getPlaceMarkerIcon(BuildContext context,
+      PlaceCategory category) async {
     switch (category) {
       case PlaceCategory.favorite:
         return BitmapDescriptor.fromAssetImage(
@@ -532,8 +557,8 @@ class PlaceMapState extends State<PlaceMap> {
     }
   }
 
-  static List<Place> _getPlacesForCategory(
-      PlaceCategory category, List<Place> places) {
+  static List<Place> _getPlacesForCategory(PlaceCategory category,
+      List<Place> places) {
     return places.where((place) => place.category == category).toList();
   }
 
@@ -563,7 +588,7 @@ class PlaceMapState extends State<PlaceMap> {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     final Position position =
-        await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
+    await Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
     return position;
   }
 }
